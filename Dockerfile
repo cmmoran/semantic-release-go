@@ -5,6 +5,9 @@ RUN go install golang.org/x/tools/cmd/goimports@latest
 # Stage 2: main runtime with Node 24 LTS + semantic-release
 FROM node:24-alpine
 
+# Install git (required by semantic-release for tagging/commits)
+RUN apk add --no-cache git openssh
+
 # Copy goimports binary from stage 1
 COPY --from=gobuilder /go/bin/goimports /usr/local/bin/goimports
 
