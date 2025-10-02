@@ -1,0 +1,12 @@
+kind: pipeline
+name: release
+
+steps:
+  - name: semantic-release
+    image: chrismoran/semantic-release-go:latest
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+      # Uncomment if you want a VERSION file or custom changelog name
+      # VERSION_FILE: VERSION
+      # CHANGELOG_FILE: HISTORY.md

@@ -1,0 +1,8 @@
+*
+!/.gitignore
+!/.drone.yml
+!entrypoint.sh
+!release.config.js
+!README.md
+!Dockerfile
+!*/
