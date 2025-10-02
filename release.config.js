@@ -2,8 +2,8 @@ const semver = require('semver');
 const { execSync } = require('child_process');
 const fs = require('fs');
 
-const VERSION_FILE = process.env.VERSION_FILE || null;
-const CHANGELOG_FILE = process.env.CHANGELOG_FILE || 'CHANGELOG.md';
+const VERSION_FILE = process.env.VERSION_FILE || process.env.PLUGIN_VERSION_FILE || null;
+const CHANGELOG_FILE = process.env.CHANGELOG_FILE || process.env.PLUGIN_CHANGELOG_FILE || 'CHANGELOG.md';
 
 module.exports = {
   branches: ['main'],
