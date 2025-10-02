@@ -13,15 +13,18 @@ COPY --from=gobuilder /go/bin/goimports /usr/local/bin/goimports
 
 # Install semantic-release + plugins
 RUN npm install -g \
+    semver \
     semantic-release \
     @semantic-release/commit-analyzer \
     @semantic-release/release-notes-generator \
     @semantic-release/changelog \
     @semantic-release/github \
     @semantic-release/git \
+    @semantic-release/exec \
     conventional-changelog-conventionalcommits
 
-COPY release.config.js /opt/release.config.js
+COPY create-credentials.js /opt/create-credentials.js
+COPY release.config.js /opt/default.release.config.js
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
