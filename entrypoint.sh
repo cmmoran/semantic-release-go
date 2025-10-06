@@ -1,8 +1,6 @@
 #!/bin/sh
 set -e
 
-cd /drone/src
-
 # Drone env fallbacks
 export GIT_AUTHOR_NAME="${PLUGIN_GIT_USER_NAME:-${GIT_AUTHOR_NAME:-ci-bot}}"
 export GIT_AUTHOR_EMAIL="${PLUGIN_GIT_USER_EMAIL:-${GIT_AUTHOR_EMAIL:-ci@example.com}}"
@@ -18,8 +16,8 @@ fi
 # Ensure config is in cwd
 if [ ! -f release.config.cjs ] && [ ! -f release.config.js ]; then
   echo ">>> No release.config.{cjs,js} found, using default from /opt"
-  cp /opt/default.release.config.js ./release.config.js
+  cp /opt/default.release.config.js release.config.js
 fi
 
-echo ">>> Running semantic-release (auto-detect config in cwd)"
+echo ">>> Running semantic-release (auto-detect config in cwd) $(pwd)"
 semantic-release --no-ci

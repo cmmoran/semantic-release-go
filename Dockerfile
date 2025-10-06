@@ -2,8 +2,8 @@
 FROM golang:1.25-alpine AS gobuilder
 RUN go install golang.org/x/tools/cmd/goimports@latest
 
-# Stage 2: main runtime with Node 24 LTS + semantic-release
-FROM node:24-alpine
+# Stage 2: main runtime with Node 20 LTS + semantic-release
+FROM node:20-alpine
 
 # Install git (required by semantic-release for tagging/commits)
 RUN apk add --no-cache git openssh
@@ -13,7 +13,6 @@ COPY --from=gobuilder /go/bin/goimports /usr/local/bin/goimports
 
 # Install semantic-release + plugins
 RUN npm install -g \
-    semver \
     semantic-release \
     @semantic-release/commit-analyzer \
     @semantic-release/release-notes-generator \

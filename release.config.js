@@ -1,9 +1,39 @@
-const semver = require('semver');
 const { execSync } = require('child_process');
 const fs = require('fs');
 
 const VERSION_FILE = process.env.VERSION_FILE || process.env.PLUGIN_VERSION_FILE || null;
 const CHANGELOG_FILE = process.env.CHANGELOG_FILE || process.env.PLUGIN_CHANGELOG_FILE || 'CHANGELOG.md';
+
+
+// Minimal semantic version helpers (avoids external semver dep)
+
+function parse(version) {
+  const [major, minor, patch] = version.replace(/^v/, "").split(".").map(x => parseInt(x, 10) || 0);
+  return { major, minor, patch };
+}
+
+function lt(a, b) {
+  const va = parse(a), vb = parse(b);
+  if (va.major !== vb.major) return va.major < vb.major;
+  if (va.minor !== vb.minor) return va.minor < vb.minor;
+  return va.patch < vb.patch;
+}
+
+function gte(a, b) {
+  return !lt(a, b);
+}
+
+function diff(a, b) {
+  const va = parse(a), vb = parse(b);
+  if (va.major !== vb.major) return "major";
+  if (va.minor !== vb.minor) return "minor";
+  if (va.patch !== vb.patch) return "patch";
+  return null;
+}
+
+function major(a) {
+  return parse(a).major;
+}
 
 module.exports = {
   branches: ['main'],
@@ -27,6 +57,7 @@ module.exports = {
         },
         releaseRules: [
           { type: 'fix', release: 'patch' },
+          { type: 'refactor', release: 'patch' },
           { type: 'perf', release: 'patch' },
           { type: 'feat', release: 'minor' },
           { type: 'break', release: 'major' },
@@ -45,7 +76,7 @@ module.exports = {
               commit.type === 'break' ||
               (commit.notes || []).some(n => /BREAKING CHANGE/i.test(n.text));
 
-            if (commit.type === 'fix' || commit.type === 'perf') {
+            if (commit.type === 'fix' || commit.type === 'perf' || commit.type === 'refactor') {
               highestRelease = highestRelease || 'patch';
             }
 
@@ -55,7 +86,7 @@ module.exports = {
             }
 
             if (hasBreaking) {
-              if (semver.lt(lastVersion, '1.0.0')) {
+              if (lt(lastVersion, '1.0.0')) {
                 highestRelease = 'minor';
               } else {
                 highestRelease = 'major';
@@ -73,10 +104,10 @@ module.exports = {
         const currentVersion = context.lastRelease?.version || '0.0.0';
 
         if (
-          semver.gte(currentVersion, '1.0.0') &&
-          semver.diff(currentVersion, nextVersion) === 'major'
+          gte(currentVersion, '1.0.0') &&
+          diff(currentVersion, nextVersion) === 'major'
         ) {
-          const major = semver.major(nextVersion);
+          const major = major(nextVersion);
           const repoUrl = context.options.repositoryUrl
             .replace(/^https?:\/\/(github.com\/)?/, 'github.com/')
             .replace(/^git@github.com:/, 'github.com/')
@@ -96,7 +127,7 @@ module.exports = {
         if (VERSION_FILE) {
           console.log(`>>> Writing version ${context.nextRelease.version} to ${VERSION_FILE}`);
           fs.writeFileSync(VERSION_FILE, context.nextRelease.version + '\n');
-          execSync(`git add ${VERSION_FILE}`, { stdio: 'inherit' });
+          execSync(`git add -f ${VERSION_FILE}`, { stdio: 'inherit' });
         }
       },
     },
